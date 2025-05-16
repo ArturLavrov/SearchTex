@@ -33,14 +33,47 @@ uvicorn main:app --reload
 
 ---
 
-## 📁 Directory Structure
+---
+
+## 🧩 API Endpoints
+
+### `GET /query`
+Query the system with a natural language question.
+```http
+POST /query
+Content-Type: application/json
+
+{
+  "query": "How do I deploy the billing service?"
+}
 ```
-searchtex/
-├── app/                 # Core logic (retriever, generator, parser)
-├── docs/                # Sample documentation files
-├── static/              # Logo and assets
-├── main.py              # FastAPI entry point
-└── README.md
+**Response:**
+```json
+{
+  "answer": "To deploy the billing service, follow these steps...",
+  "sources": [
+    {
+      "document": "deployment_guide.md",
+      "snippet": "..."
+    }
+  ]
+}
+```
+
+### `POST /upload`
+Upload and ingest a new document.
+```http
+POST /upload
+Content-Type: multipart/form-data
+
+file: <your_pdf_or_markdown_file>
+```
+**Response:**
+```json
+{
+  "status": "success",
+  "filename": "guide.pdf"
+}
 ```
 
 ---
