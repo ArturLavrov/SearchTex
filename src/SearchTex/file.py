@@ -9,9 +9,11 @@ class File:
 
     def parse(self):
         if self.file_name.endswith(".pdf"):
-            return self._parse_text_from_pdf(self.file_content)
+            text = self._parse_text_from_pdf(self.file_content)
+            return {"text":text}
         elif self.file_name.endswith(".md") or self.file_name.endswith(".markdown"):
-            return self._parse_text_from_markdown(self.file_content)
+            text = self._parse_text_from_markdown(self.file_content)
+            return {"text": text}
         else:
             return {
                 "error": f"Unsupported file type: {self.file_name}"

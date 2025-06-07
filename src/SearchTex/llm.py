@@ -1,7 +1,11 @@
 from haystack_integrations.components.generators.ollama import OllamaGenerator
 
 class LLM:
-    def get_text_generator(self):
+    @staticmethod
+    def get_text_generator():
+        """
+        Returns a backed in generator for current LLM.
+        """
         return OllamaGenerator(
             model="llama3.2",
             url="http://localhost:11434",

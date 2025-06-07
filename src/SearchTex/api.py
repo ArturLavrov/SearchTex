@@ -1,7 +1,8 @@
+from filetype.types import DOCUMENT
 from flask import Flask, request, jsonify
 from haystack.core.pipeline import Pipeline
 from haystack.dataclasses import Document
-from haystack.document_stores.in_memory import InMemoryDocumentStore
+#from haystack.document_stores.in_memory import InMemoryDocumentStore
 from haystack.components.embedders import SentenceTransformersDocumentEmbedder
 from haystack.components.embedders import SentenceTransformersTextEmbedder
 from haystack.components.retrievers.in_memory import InMemoryEmbeddingRetriever
@@ -9,17 +10,20 @@ from haystack.components.builders.prompt_builder import PromptBuilder
 from haystack_integrations.components.generators.ollama import OllamaGenerator
 from pypdf import PdfReader
 from markdown_it import MarkdownIt
+from file import File
+from document_store import DocumentStore
+from document import Document
 import io
 
 # --- Init Flask app and Haystack components ---
 app = Flask(__name__)
-document_store = InMemoryDocumentStore(embedding_similarity_function="cosine")
+#document_store = InMemoryDocumentStore(embedding_similarity_function="cosine")
 document_embeder = SentenceTransformersDocumentEmbedder(model="sentence-transformers/all-MiniLM-L6-v2")
 document_embeder.warm_up()
 text_embeder = SentenceTransformersTextEmbedder(model="sentence-transformers/all-MiniLM-L6-v2")
 text_embeder.warm_up()
 
-retriever = InMemoryEmbeddingRetriever(document_store=document_store)
+#retriever = InMemoryEmbeddingRetriever(document_store=document_store)
 generator = OllamaGenerator(
     model="llama3.2",
     url="http://localhost:11434",
@@ -47,51 +51,35 @@ Your answer:
 prompt_builder = PromptBuilder(template=prompt_template)
 
 # Pipeline
-pipeline = Pipeline()
-pipeline.add_component("text_embedder", text_embeder)
-pipeline.add_component("retriever", retriever)
-pipeline.add_component("prompt_builder", prompt_builder)
-pipeline.add_component("llm", generator)
-pipeline.connect("text_embedder.embedding", "retriever.query_embedding")
-pipeline.connect("retriever", "prompt_builder.documents")
-pipeline.connect("prompt_builder", "llm")
+#pipeline = Pipeline()
+#pipeline.add_component("text_embedder", text_embeder)
+#pipeline.add_component("retriever", retriever)
+#pipeline.add_component("prompt_builder", prompt_builder)
+#pipeline.add_component("llm", generator)
+#pipeline.connect("text_embedder.embedding", "retriever.query_embedding")
+#pipeline.connect("retriever", "prompt_builder.documents")
+#pipeline.connect("prompt_builder", "llm")
 
 md = MarkdownIt()
 
-# --- Utils ---
-def parse_pdf(file_bytes: bytes) -> str:
-    reader = PdfReader(io.BytesIO(file_bytes))
-    return "\n".join([page.extract_text() or "" for page in reader.pages])
-
-def parse_markdown(file_bytes: bytes) -> str:
-    text = file_bytes.decode("utf-8")
-    tokens = md.parse(text)
-    return "\n".join([t.content for t in tokens if t.type == "inline"])
-
-# --- Routes ---
 @app.route("/upload", methods=["POST"])
 def upload():
-    #implement document preprocessing
     file = request.files.get("file")
     if not file:
         return jsonify({"error": "No file uploaded"}), 400
 
-    filename = file.filename
-    file_bytes = file.read()
+    file = File(file.filename, file.read())
+    parse_result = file.parse()
+    if "error" in parse_result:
+        return jsonify(parse_result)
 
-    if filename.endswith(".pdf"):
-        text = parse_pdf(file_bytes)
-    elif filename.endswith(".md") or filename.endswith(".markdown"):
-        text = parse_markdown(file_bytes)
-    else:
-        return jsonify({"error": "Unsupported file type"}), 400
+    document = Document(parse_result["text"])
+    document.generate_embeddings()
 
-    doc = Document(content=text)
-    embedded_result = document_embeder.run([doc])
-    doc.embedding = embedded_result["documents"][0].embedding
-    document_store.write_documents([doc])
-
-    return jsonify({"message": f"{filename} uploaded and embedded."})
+    document_store = DocumentStore()
+    document_store.add_document(document)
+    
+    return jsonify({"message": f"{file.file_name} uploaded and embedded."})
 
 @app.route("/query", methods=["GET"])
 def query():
@@ -99,8 +87,8 @@ def query():
     if not user_query:
         return jsonify({"error": "No query provided"}), 400
 
-    result = pipeline.run({"text_embedder": {"text": user_query}, "prompt_builder": {"question": user_query}})
-    return jsonify({"response": result["llm"]["replies"][0]})
+    #result = pipeline.run({"text_embedder": {"text": user_query}, "prompt_builder": {"question": user_query}})
+    #return jsonify({"response": result["llm"]["replies"][0]})
 
 # --- Entry Point ---
 if __name__ == "__main__":
