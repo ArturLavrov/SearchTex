@@ -8,7 +8,7 @@
 
 ## 🚀 Features
 
-- 🔍 Semantic search powered by vector embeddings (e.g., FAISS)
+- 🔍 Semantic search powered by vector embeddings 
 - 🧠 LLM-backed natural language answer generation
 - 📄 Support for PDF and Markdown document ingestion
 ---
