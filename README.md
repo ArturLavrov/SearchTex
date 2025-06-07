@@ -40,23 +40,12 @@ uvicorn main:app --reload
 ### `GET /query`
 Query the system with a natural language question.
 ```http
-POST /query
-Content-Type: application/json
-
-{
-  "query": "How do I deploy the billing service?"
-}
+GET /query?query=How to deploy app to cloud?
 ```
 **Response:**
 ```json
 {
-  "answer": "To deploy the billing service, follow these steps...",
-  "sources": [
-    {
-      "document": "deployment_guide.md",
-      "snippet": "..."
-    }
-  ]
+  "response": "To deploy your app to the cloud you should follow the following steps..."
 }
 ```
 
@@ -71,8 +60,7 @@ file: <your_pdf_or_markdown_file>
 **Response:**
 ```json
 {
-  "status": "success",
-  "filename": "guide.pdf"
+  "message": "<your_pdf_or_markdown_file> uploaded and embedded."
 }
 ```
 
