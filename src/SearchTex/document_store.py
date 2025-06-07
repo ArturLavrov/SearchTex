@@ -1,5 +1,5 @@
-from haystack.document_stores.in_memory import InMemoryDocumentStore
 from haystack.dataclasses import Document as HaystackDocument
+from haystack_integrations.document_stores.pgvector import PgvectorDocumentStore
 import threading
 
 
@@ -16,11 +16,17 @@ class SingletonMeta(type):
 
 class DocumentStore(metaclass=SingletonMeta):
     def __init__(self):
-        self.document_store = InMemoryDocumentStore(embedding_similarity_function="cosine")
+        self.document_store = PgvectorDocumentStore(
+            table_name="documents",
+            embedding_dimension=384, #TODO: param should be configurable and depends on embedder type
+            vector_function="cosine_similarity",
+            recreate_table=False,
+        )
 
     def add_document(self, doc):
-        storage_document = HaystackDocument(content=doc.get_content())
-        storage_document.embedding = doc.get_embeddings()
+        embedding = doc.get_embeddings()
+        doc_content = doc.get_content()
+        storage_document = HaystackDocument(content=doc_content, embedding=embedding)
         self.document_store.write_documents([storage_document])
 
     def get_instance(self):

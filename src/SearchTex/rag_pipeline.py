@@ -1,14 +1,16 @@
 from haystack.core.pipeline import Pipeline
 from haystack.components.embedders import SentenceTransformersTextEmbedder
-from haystack.components.retrievers.in_memory import InMemoryEmbeddingRetriever
+from haystack_integrations.components.retrievers.pgvector import PgvectorEmbeddingRetriever
 from haystack.components.builders.prompt_builder import PromptBuilder
 from promt_template import LLMPrompt
 from llm import LLM
 from document_store import DocumentStore
-
+import logging
+from haystack import tracing
+from haystack.tracing.logging_tracer import LoggingTracer
 
 class RagPipeline:
-    def __init__(self):
+    def __init__(self, is_pipeline_tracing_enabled):
         self.pipeline = Pipeline()
         self.pipeline.add_component("text_embedder", self.__get_text_embedder())
         self.pipeline.add_component("retriever", self.__get_retriever())
@@ -17,6 +19,9 @@ class RagPipeline:
         self.pipeline.connect("text_embedder.embedding", "retriever.query_embedding")
         self.pipeline.connect("retriever", "prompt_builder.documents")
         self.pipeline.connect("prompt_builder", "llm")
+
+        if is_pipeline_tracing_enabled:
+            self.__enable_pipeline_tracing()
 
     def run(self, user_query):
         result =  self.pipeline.run(
@@ -38,7 +43,7 @@ class RagPipeline:
     @staticmethod
     def __get_retriever():
         haystack_document_store = DocumentStore().get_instance()
-        return  InMemoryEmbeddingRetriever(document_store=haystack_document_store)
+        return PgvectorEmbeddingRetriever(document_store=haystack_document_store, top_k=1)
 
     @staticmethod
     def __get_prompt_builder():
@@ -49,3 +54,11 @@ class RagPipeline:
     def __get_llm():
         llm = LLM()
         return llm.get_text_generator()
+
+    @staticmethod
+    def __enable_pipeline_tracing():
+        logging.basicConfig(format="%(levelname)s - %(name)s -  %(message)s", level=logging.WARNING)
+        logging.getLogger("haystack").setLevel(logging.DEBUG)
+        tracing.tracer.is_content_tracing_enabled = True  # to enable tracing/logging content (inputs/outputs)
+        tracing.enable_tracing(LoggingTracer(
+            tags_color_strings={"haystack.component.input": "\x1b[1;31m", "haystack.component.name": "\x1b[1;34m"}))

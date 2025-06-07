@@ -1,5 +1,6 @@
 from haystack.components.embedders import SentenceTransformersDocumentEmbedder
 from haystack.dataclasses import Document as HaystackDocument
+
 class Document:
     def __init__(self, content: str):
         self.content = content
