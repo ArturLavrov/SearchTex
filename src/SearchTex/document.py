@@ -15,3 +15,6 @@ class Document:
 
     def get_embeddings(self):
         return self.embeddings
+
+    def get_content(self):
+        return self.content
