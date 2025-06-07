@@ -35,7 +35,6 @@ class RagPipeline:
 
     @staticmethod
     def __get_text_embedder():
-        #TODO: move to class user_query_embeder
         text_embeder = SentenceTransformersTextEmbedder(model="sentence-transformers/all-MiniLM-L6-v2")
         text_embeder.warm_up()
         return text_embeder
