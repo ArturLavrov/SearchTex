@@ -1,7 +1,8 @@
+import os
 from haystack.dataclasses import Document as HaystackDocument
 from haystack_integrations.document_stores.pgvector import PgvectorDocumentStore
 import threading
-
+from config import Config
 
 class SingletonMeta(type):
     _instances = {}
@@ -16,6 +17,7 @@ class SingletonMeta(type):
 
 class DocumentStore(metaclass=SingletonMeta):
     def __init__(self):
+        os.environ["PG_CONN_STR"] = Config.get("DB_CONN")
         self.document_store = PgvectorDocumentStore(
             table_name="documents",
             embedding_dimension=384, #TODO: param should be configurable and depends on embedder type
