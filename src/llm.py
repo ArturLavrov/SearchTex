@@ -11,5 +11,5 @@ class LLM:
         return OllamaGenerator(
             model=Config.get("LLM_MODEL_NAME"),
             url=Config.get("LLM_URL"),
-            generation_kwargs={"num_predict": 100, "temperature": 0.9}
+            generation_kwargs={"num_predict": 512, "temperature": 0.8}
         )
