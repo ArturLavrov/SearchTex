@@ -10,7 +10,7 @@ services:
     environment:
       - DATABASE_URL=postgresql://postgres:postgres@pgvector-db:5432/postgres
       - LLM_MODEL_NAME=llama3.2
-      - LLM_URL=http://localhost:11434
+      - LLM_URL=http://host.docker.internal:11434
     depends_on:
       - pgvector-db
     restart: unless-stopped
@@ -28,18 +28,5 @@ services:
     volumes:
       - pgvector_data:/var/lib/postgresql/data
 
-  ollama:
-    image: ollama/ollama
-    container_name: ollama
-    ports:
-      - "11434:11434"
-    volumes:
-      - ollama_data:/root/.ollama
-    restart: unless-stopped
-    tty: true
-    command: >
-      bash -c "ollama pull llama3.2 && ollama serve"
-
 volumes:
   pgvector_data:
-  ollama_data:
