@@ -1,3 +1,5 @@
 {
-  "DB_CONN": "postgresql://postgres:postgres@localhost:5432/postgres"
+  "DATABASE_URL": "postgresql://postgres:postgres@localhost:5432/postgres",
+  "LLM_MODEL_NAME": "llama3.2",
+  "LLM_URL": "http://localhost:11434"
 }

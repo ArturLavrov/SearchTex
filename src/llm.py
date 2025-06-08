@@ -1,4 +1,6 @@
 from haystack_integrations.components.generators.ollama import OllamaGenerator
+from config import Config
+
 
 class LLM:
     @staticmethod
@@ -7,7 +9,7 @@ class LLM:
         Returns a backed in generator for current LLM.
         """
         return OllamaGenerator(
-            model="llama3.2",
-            url="http://localhost:11434",
-            generation_kwargs={"num_predict": 100, "temperature": 0.9} #play with this param should reduce galicination from LLM
+            model=Config.get("LLM_MODEL_NAME"),
+            url=Config.get("LLM_URL"),
+            generation_kwargs={"num_predict": 100, "temperature": 0.9}
         )

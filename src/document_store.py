@@ -17,7 +17,7 @@ class SingletonMeta(type):
 
 class DocumentStore(metaclass=SingletonMeta):
     def __init__(self):
-        os.environ["PG_CONN_STR"] = Config.get("DB_CONN")
+        os.environ["PG_CONN_STR"] = Config.get("DATABASE_URL")
         self.document_store = PgvectorDocumentStore(
             table_name="documents",
             embedding_dimension=384, #TODO: param should be configurable and depends on embedder type
