@@ -1,5 +1,5 @@
 {
-  "DATABASE_URL": "postgresql://postgres:postgres@localhost:5432/postgres",
+  "DATABASE_URL": "postgresql://user:password@localhost:5432/vectordb",
   "LLM_MODEL_NAME": "llama3.2",
   "LLM_URL": "http://localhost:11434"
 }

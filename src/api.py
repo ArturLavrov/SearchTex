@@ -1,5 +1,4 @@
 from flask import Flask, request, jsonify
-from haystack.dataclasses import Document
 from file import File
 from document_store import DocumentStore
 from document import Document
@@ -21,10 +20,12 @@ def upload():
         return jsonify(parse_result)
 
     document = Document(parse_result["text"])
-    document.generate_embeddings()
-
+    docs = document.split()
     document_store = DocumentStore()
-    document_store.add_document(document)
+
+    for doc in docs:
+        doc.generate_embeddings()
+        document_store.add_document(doc)
 
     return jsonify({"message": f"{file.file_name} uploaded and embedded."})
 

@@ -42,7 +42,7 @@ class RagPipeline:
     @staticmethod
     def __get_retriever():
         haystack_document_store = DocumentStore().get_instance()
-        return PgvectorEmbeddingRetriever(document_store=haystack_document_store, top_k=1)
+        return PgvectorEmbeddingRetriever(document_store=haystack_document_store, top_k=5)
 
     @staticmethod
     def __get_prompt_builder():

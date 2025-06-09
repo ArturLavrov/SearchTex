@@ -1,4 +1,5 @@
 from haystack.components.embedders import SentenceTransformersDocumentEmbedder
+from haystack.components.preprocessors import DocumentSplitter
 from haystack.dataclasses import Document as HaystackDocument
 
 class Document:
@@ -19,3 +20,10 @@ class Document:
 
     def get_content(self):
         return self.content
+
+    def split(self):
+        splitter = DocumentSplitter(split_by="sentence", split_length=4, split_threshold=3)
+        splitter.warm_up()
+        splitter_output = splitter.run(documents=[HaystackDocument(content=self.content)])
+        split_docs = splitter_output["documents"]
+        return [Document(content=doc.content) for doc in split_docs]
